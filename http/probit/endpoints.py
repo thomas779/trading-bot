@@ -4,20 +4,23 @@ import requests
 
 access_token = AccessToken()["access_token"]
 
-def GeneralEndpoint(endpoint, submissionType, enableDump):
+# Endpoint expires after 15 mins
+def GeneralEndpoint(endpoint, submissionType, enableDump, **payloadTypes):
     url = f'https://api.probit.com/api/exchange/v1/{endpoint}'
 
     match submissionType:
         case "GET":
-            headers = SetEndpointGET(endpoint)
+            header = SetEndpointGET()
+            response = requests.get(url, headers=header)
         case "GETAuth":
-            headers = SetEndpointGETAuthenticated(endpoint)
+            header = SetEndpointGETAuthenticated()
+            response = requests.get(url, headers=header)
         case "POSTAuth":
-            headers = SetEndpointPOSTAuthenticated(endpoint)
+            payload, header = SetEndpointPOSTAuthenticated(**payloadTypes)
+            response = requests.post(url, json=payload, headers=header)
+            #print(requests.post(url, json=payload, headers=header))
         case _:
             print("ERROR: submissionType")
-
-    response = requests.get(url, headers=headers)
 
     if enableDump:
         stringifed_response = json.loads(response.text)
@@ -28,22 +31,44 @@ def GeneralEndpoint(endpoint, submissionType, enableDump):
     return data
 
 # Set Endpoints for GET responses
-def SetEndpointGET(endpoint):
+def SetEndpointGET():
     return {
         "accept": "application/json",
     }
 
 # Set Endpoints for Authanticated GET responses
-def SetEndpointGETAuthenticated(endpoint):
+def SetEndpointGETAuthenticated():
     return {
         "accept": "application/json",
         "authorization": f"Bearer {access_token}"
     }
 
 # Set Endpoints for authenticated POST requests
-def SetEndpointPOSTAuthenticated(endpoint):
-    return {
+def SetEndpointPOSTAuthenticated(**payloadTypes):
+    if payloadTypes['type'] == "limit":
+        payload = {
+            "market_id": f"{payloadTypes['market_id']}",
+            "type": f"{payloadTypes['type']}",
+            "side": f"{payloadTypes['side']}",
+            "time_in_force": f"{payloadTypes['time_in_force']}",
+            "limit_price": f"{payloadTypes['limit_price']}",
+            "quantity": f"{payloadTypes['quantity']}"
+        }
+    elif payloadTypes['type'] == "market":
+        payload = {
+            "market_id": f"{payloadTypes['market_id']}",
+            "type": f"{payloadTypes['type']}",
+            "side": f"{payloadTypes['side']}",
+            "time_in_force": f"{payloadTypes['time_in_force']}",
+            "cost": f"{payloadTypes['quantity']}"
+        }
+    else:
+        print("ERROR: payload in POSTAuth")
+
+    headers = {
         "accept": "application/json",
         "content-type": "application/json",
         "authorization": f"Bearer {access_token}"
     }
+
+    return payload, headers
