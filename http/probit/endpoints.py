@@ -1,8 +1,11 @@
+from os import access
 from access_token import AccessToken
 import json
 import requests
+import threading
 
-access_token = AccessToken()["access_token"]
+def FetchNewAccessToken():
+  return AccessToken()["access_token"]
 
 # Endpoint expires after 15 mins
 def GeneralEndpoint(endpoint, submissionType, enableDump, **payloadTypes):
@@ -40,7 +43,7 @@ def SetEndpointGET():
 def SetEndpointGETAuthenticated():
     return {
         "accept": "application/json",
-        "authorization": f"Bearer {access_token}"
+        "authorization": f"Bearer {FetchNewAccessToken()}"
     }
 
 # Set Endpoints for authenticated POST requests
@@ -50,17 +53,25 @@ def SetEndpointPOSTAuthenticated(**payloadTypes):
             "market_id": f"{payloadTypes['market_id']}",
             "type": f"{payloadTypes['type']}",
             "side": f"{payloadTypes['side']}",
+            "client_order_id": f"{payloadTypes['client_order_id']}",
             "time_in_force": f"{payloadTypes['time_in_force']}",
             "limit_price": f"{payloadTypes['limit_price']}",
             "quantity": f"{payloadTypes['quantity']}"
         }
+    # Some markets may have market buying disabled
     elif payloadTypes['type'] == "market":
         payload = {
             "market_id": f"{payloadTypes['market_id']}",
             "type": f"{payloadTypes['type']}",
             "side": f"{payloadTypes['side']}",
+            "client_order_id": f"{payloadTypes['client_order_id']}",
             "time_in_force": f"{payloadTypes['time_in_force']}",
             "cost": f"{payloadTypes['quantity']}"
+        }
+    elif payloadTypes['type'] == "cancel_order":
+        payload = {
+            "market_id": f"{payloadTypes['market_id']}",
+            "order_id": f"{payloadTypes['order_id']}"
         }
     else:
         print("ERROR: payload in POSTAuth")
@@ -68,7 +79,7 @@ def SetEndpointPOSTAuthenticated(**payloadTypes):
     headers = {
         "accept": "application/json",
         "content-type": "application/json",
-        "authorization": f"Bearer {access_token}"
+        "authorization": f"Bearer {FetchNewAccessToken()}"
     }
 
     return payload, headers
