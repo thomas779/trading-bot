@@ -15,7 +15,7 @@ def GetOpenOrders(market):
 
 def CancelOrder(**payloadTypes):
     response = GeneralEndpoint("cancel_order", "POSTAuth", enableDump=False, **payloadTypes)
-    print(response)
+    #print(response)
     return response
 
 def GetOrderBook(market):
@@ -81,7 +81,7 @@ def orderType(quantity=0, value_in_range=0, id=0):
 
 def MakeBalanceEven(best_bid, best_ask):
     quantityDifference =  CheckBalance() - 2500
-    print(f"Balance Uneven. Submitting Order for {quantityDifference}...")
+    print(f"Balance Uneven. Submitting Order for {my_ceil(quantityDifference, 4)}...")
 
     if quantityDifference > 0:
         sell_order = orderType(quantityDifference, my_ceil((best_ask + 0.0002), 4))[0]
