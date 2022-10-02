@@ -53,7 +53,6 @@ def SetEndpointPOSTAuthenticated(**payloadTypes):
             "market_id": f"{payloadTypes['market_id']}",
             "type": f"{payloadTypes['type']}",
             "side": f"{payloadTypes['side']}",
-            "client_order_id": f"{payloadTypes['client_order_id']}",
             "time_in_force": f"{payloadTypes['time_in_force']}",
             "limit_price": f"{payloadTypes['limit_price']}",
             "quantity": f"{payloadTypes['quantity']}"
@@ -64,14 +63,13 @@ def SetEndpointPOSTAuthenticated(**payloadTypes):
             "market_id": f"{payloadTypes['market_id']}",
             "type": f"{payloadTypes['type']}",
             "side": f"{payloadTypes['side']}",
-            "client_order_id": f"{payloadTypes['client_order_id']}",
             "time_in_force": f"{payloadTypes['time_in_force']}",
             "cost": f"{payloadTypes['quantity']}"
         }
     elif payloadTypes['type'] == "cancel_order":
         payload = {
             "market_id": f"{payloadTypes['market_id']}",
-            "order_id": f"{payloadTypes['order_id']}"
+            "order_id": f"{payloadTypes['id']}"
         }
     else:
         print("ERROR: payload in POSTAuth")

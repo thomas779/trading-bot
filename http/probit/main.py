@@ -11,8 +11,7 @@ def GetMarket():
     return response
 
 def GetOpenOrders(market):
-    response = GeneralEndpoint(f"open_order?market_id={market}", "GETAuth", enableDump=False)["data"]
-    return response
+    return GeneralEndpoint(f"open_order?market_id={market}", "GETAuth", enableDump=False)["data"]
 
 def CancelOrder(**payloadTypes):
     response = GeneralEndpoint("cancel_order", "POSTAuth", enableDump=False, **payloadTypes)
@@ -38,10 +37,10 @@ def GetOrderBook(market):
 
 def ExecuteOrder(**payloadTypes):
     response = GeneralEndpoint("new_order", "POSTAuth", enableDump=False, **payloadTypes)
-    print(response)
+    #print(response)
     return response
 
-def orderType(quantity=0, value_in_range=0, order_id=100000):
+def orderType(quantity=0, value_in_range=0, id=0):
     sell_order = {
         "market_id": "FBX-USDT",
         "type": "limit",
@@ -75,15 +74,17 @@ def orderType(quantity=0, value_in_range=0, order_id=100000):
     cancel_order = {
         "market_id": "FBX-USDT",
         "type": "cancel_order",
-        "order_id": f"{order_id}"
+        "id": f"{id}"
     }
 
     return sell_order, buy_order_limit, buy_order_market, cancel_order
 
 def MakeBalanceEven(best_bid):
-    quantityDifference =  CheckBalance() - 2500
+    print("Balance Uneven. Submitting Order...")
+    quantityDifference =  abs(CheckBalance() - 2500)
     buy_order_limit = orderType(quantityDifference, my_ceil((best_bid - 0.0002), 4))[1]
     ExecuteOrder(**buy_order_limit)
+    print("Order Complete. Balance now even.")
 
 def CheckBalance():
     balance = float(GetBalance()[2]["total"])
@@ -97,7 +98,7 @@ def ErrorHandling(quantity):
 
 def main():
     c = 0
-    while (c != 500):
+    while (c != 2500):
         best_bid, best_ask = GetOrderBook("FBX-USDT")
         inital_balance = CheckBalance()
         
@@ -120,13 +121,16 @@ def main():
         buy_response = ExecuteOrder(**buy_order_limit)
         print(f"Bid: Amount@{quantity} Price@{value_in_range}")
         
-        # Check balance is the same after
+        # Store balance after the trade
         current_balance = CheckBalance()
-        
+
         # TODO: Check no open orders
         if len(GetOpenOrders("FBX-USDT")) != 0:
-            CancelOrder(**orderType(quantity, order_id=int(sell_response["client_order_id"]))[3])
-            CancelOrder(**orderType(quantity, order_id=int(buy_response["client_order_id"]))[3])
+            print(GetOpenOrders("FBX-USDT"))
+            print(sell_response["data"]["id"])
+            print(buy_response["data"]["id"])
+            CancelOrder(**orderType(quantity, id=int(sell_response["data"]["id"]))[3])
+            CancelOrder(**orderType(quantity, id=int(buy_response["data"]["id"]))[3])
 
         # Check if order was not filled correctly
         if "errorCode" in buy_response:
