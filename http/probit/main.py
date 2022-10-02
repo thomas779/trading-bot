@@ -79,11 +79,17 @@ def orderType(quantity=0, value_in_range=0, id=0):
 
     return sell_order, buy_order_limit, buy_order_market, cancel_order
 
-def MakeBalanceEven(best_bid):
-    print("Balance Uneven. Submitting Order...")
-    quantityDifference =  abs(CheckBalance() - 2500)
-    buy_order_limit = orderType(quantityDifference, my_ceil((best_bid - 0.0002), 4))[1]
-    ExecuteOrder(**buy_order_limit)
+def MakeBalanceEven(best_bid, best_ask):
+    quantityDifference =  CheckBalance() - 2500
+    print(f"Balance Uneven. Submitting Order for {quantityDifference}...")
+
+    if quantityDifference > 0:
+        sell_order = orderType(quantityDifference, my_ceil((best_ask + 0.0002), 4))[0]
+        ExecuteOrder(**sell_order)
+    elif quantityDifference < 0:
+        buy_order_limit = orderType(abs(quantityDifference), my_ceil((best_bid - 0.0002), 4))[1]
+        ExecuteOrder(**buy_order_limit)
+    
     print("Order Complete. Balance now even.")
 
 def CheckBalance():
@@ -126,20 +132,19 @@ def main():
 
         # TODO: Check no open orders
         if len(GetOpenOrders("FBX-USDT")) != 0:
-            print(GetOpenOrders("FBX-USDT"))
-            print(sell_response["data"]["id"])
-            print(buy_response["data"]["id"])
+            print("Looks like someone else filled you. Cancelling orders...")
             CancelOrder(**orderType(quantity, id=int(sell_response["data"]["id"]))[3])
             CancelOrder(**orderType(quantity, id=int(buy_response["data"]["id"]))[3])
 
         # Check if order was not filled correctly
-        if "errorCode" in buy_response:
+        if "errorCode" in buy_response or "errorCode" in sell_response:
             ErrorHandling(quantity)
             continue
+        
         # Optimise using WebSockets
         # Check initial wallet balance is equal to current balance after execution.
-        elif (inital_balance != current_balance):
-            MakeBalanceEven(best_bid)
+        if (inital_balance != current_balance):
+            MakeBalanceEven(best_bid, best_ask)
         c += 1
         # main()
 
