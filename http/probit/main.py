@@ -77,7 +77,7 @@ def orderType(quantity=0, value_in_range=0, id=0):
     return sell_order, buy_order_limit, buy_order_market, cancel_order
 
 def MakeBalanceEven(best_bid, best_ask):
-    quantityDifference =  CheckBalance() - 2500
+    quantityDifference =  CheckBalance() - 3000
     quantityDifference = my_ceil(quantityDifference, 4)
     print(f"Balance Uneven. Submitting Order for {quantityDifference}...")
 
@@ -119,7 +119,7 @@ def main():
         value_in_range = round(random.uniform(best_bid, best_ask),4)
 
         # Will fail if minimum value is below threshold needed to execute
-        quantity = round(random.uniform(35, 200),4)
+        quantity = round(random.uniform(500, 2000),4)
         
         sell_order = orderType(quantity, value_in_range)[0]
         sell_response = ExecuteOrder(**sell_order)
