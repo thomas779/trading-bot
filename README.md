@@ -40,7 +40,12 @@ nano .env
 # OPTIONAL: confirmed saved chagnes to .env file
 cat .env
 ```
-5. Run the program
+5. Run the program 
 ```bash
+# without logging out
 python3 http/probit/main.py
+
+# OR
+# logged out
+nohup python3 http/probit/main.py &
 ```
