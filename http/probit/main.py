@@ -4,14 +4,14 @@ from precision import *
 import random
 
 def GetBalance():
-    return GeneralEndpoint("balance", "GETAuth", enableDump=False)["data"]
+    return GeneralEndpoint("balance", "GETAuth", enableDump=False).get("data", {})
 
 def GetMarket():
     response = GeneralEndpoint("market", "GET", enableDump=True)
     return response
 
 def GetOpenOrders(market):
-    return GeneralEndpoint(f"open_order?market_id={market}", "GETAuth", enableDump=False)["data"]
+    return GeneralEndpoint(f"open_order?market_id={market}", "GETAuth", enableDump=False).get("data", {})
 
 def CancelOrder(**payloadTypes):
     response = GeneralEndpoint("cancel_order", "POSTAuth", enableDump=False, **payloadTypes)
@@ -19,7 +19,7 @@ def CancelOrder(**payloadTypes):
     return response
 
 def GetOrderBook(market):
-    response = GeneralEndpoint(f"order_book?market_id={market}", "GET", enableDump=False)["data"]
+    response = GeneralEndpoint(f"order_book?market_id={market}", "GET", enableDump=False).get("data", {})
 
     best_bid = "0"
     best_ask = str(float("inf")) # Whatever value is highest - needs optimising
@@ -46,7 +46,6 @@ def orderType(quantity=0, value_in_range=0, id=0):
         "type": "limit",
         "side": "sell",
         "time_in_force": "gtc",
-        "client_order_id": f"{int(random.uniform(10000, 99999999))}",
         "limit_price": f"{value_in_range}",
         "quantity": f"{quantity}"
     }
@@ -56,7 +55,6 @@ def orderType(quantity=0, value_in_range=0, id=0):
         "type": "limit",
         "side": "buy",
         "time_in_force": "fok",
-        "client_order_id": f"{int(random.uniform(10000, 99999999))}",
         "limit_price": f"{value_in_range}",
         "quantity": f"{quantity}"
     }
@@ -67,7 +65,6 @@ def orderType(quantity=0, value_in_range=0, id=0):
         "type": "market",
         "side": "buy",
         "time_in_force": "ioc",
-        "client_order_id": f"{int(random.uniform(10000, 99999999))}",
         "quantity": f"{quantity}"
     }
 
@@ -81,19 +78,24 @@ def orderType(quantity=0, value_in_range=0, id=0):
 
 def MakeBalanceEven(best_bid, best_ask):
     quantityDifference =  CheckBalance() - 2500
-    print(f"Balance Uneven. Submitting Order for {my_ceil(quantityDifference, 4)}...")
+    quantityDifference = my_ceil(quantityDifference, 4)
+    print(f"Balance Uneven. Submitting Order for {quantityDifference}...")
 
     if quantityDifference > 0:
-        sell_order = orderType(quantityDifference, my_ceil((best_ask + 0.0002), 4))[0]
-        ExecuteOrder(**sell_order)
+        best_bid = my_ceil((best_bid - 0.0004), 4)
+        print(best_bid)
+        sell_order = orderType(quantityDifference, best_bid)[0]
+        print(ExecuteOrder(**sell_order))
     elif quantityDifference < 0:
-        buy_order_limit = orderType(abs(quantityDifference), my_ceil((best_bid - 0.0002), 4))[1]
-        ExecuteOrder(**buy_order_limit)
+        best_ask = my_ceil((best_ask + 0.0004), 4)
+        print(best_ask)
+        buy_order_limit = orderType(abs(quantityDifference), best_ask)[1]
+        print(ExecuteOrder(**buy_order_limit))
     
     print("Order Complete. Balance now even.")
 
 def CheckBalance():
-    balance = float(GetBalance()[2]["total"])
+    balance = float(GetBalance()[2].get("total", "<total not found>"))
     return balance
 
 def ErrorHandling(quantity):
@@ -129,17 +131,21 @@ def main():
         
         # Store balance after the trade
         current_balance = CheckBalance()
+        sell_response_id = sell_response.get("data", {}).get("id", {})
+        buy_response_id = buy_response.get("data", {}).get("id", {})
 
         # TODO: Check no open orders
         if len(GetOpenOrders("FBX-USDT")) != 0:
             print("Looks like someone else filled you. Cancelling orders...")
-            CancelOrder(**orderType(quantity, id=int(sell_response["data"]["id"]))[3])
-            CancelOrder(**orderType(quantity, id=int(buy_response["data"]["id"]))[3])
+            CancelOrder(**orderType(quantity, id=sell_response_id)[3])
+            CancelOrder(**orderType(quantity, id=buy_response_id)[3])
 
         # Check if order was not filled correctly
-        if "errorCode" in buy_response or "errorCode" in sell_response:
+        if "errorCode" in buy_response:
+            #print(quantity)
+            #print(buy_response)
             ErrorHandling(quantity)
-            continue
+            # continue
         
         # Optimise using WebSockets
         # Check initial wallet balance is equal to current balance after execution.
