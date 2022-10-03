@@ -119,7 +119,7 @@ def main():
         value_in_range = round(random.uniform(best_bid, best_ask),4)
 
         # Will fail if minimum value is below threshold needed to execute
-        quantity = round(random.uniform(1000, 5000),4)
+        quantity = round(random.uniform(4000, 10000),4)
         
         sell_order = orderType(quantity, value_in_range)[0]
         sell_response = ExecuteOrder(**sell_order)
