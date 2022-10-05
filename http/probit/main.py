@@ -76,23 +76,23 @@ def orderType(quantity=0, value_in_range=0, id=0):
 
     return sell_order, buy_order_limit, buy_order_market, cancel_order
 
-def MakeBalanceEven(best_bid, best_ask):
-    quantityDifference =  CheckBalance() - 3500
-    quantityDifference = my_ceil(quantityDifference, 4)
-    print(f"Balance Uneven. Submitting Order for {quantityDifference}...")
+# def MakeBalanceEven(best_bid, best_ask):
+#     quantityDifference =  CheckBalance() - 3500
+#     quantityDifference = my_ceil(quantityDifference, 4)
+#     print(f"Balance Uneven. Submitting Order for {quantityDifference}...")
 
-    if quantityDifference > 0:
-        best_bid = my_ceil((best_bid - 0.0004), 4)
-        print(best_bid)
-        sell_order = orderType(quantityDifference, best_bid)[0]
-        print(ExecuteOrder(**sell_order))
-    elif quantityDifference < 0:
-        best_ask = my_ceil((best_ask + 0.0004), 4)
-        print(best_ask)
-        buy_order_limit = orderType(abs(quantityDifference), best_ask)[1]
-        print(ExecuteOrder(**buy_order_limit))
+#     if quantityDifference > 0:
+#         best_bid = my_ceil((best_bid - 0.0004), 4)
+#         print(best_bid)
+#         sell_order = orderType(quantityDifference, best_bid)[0]
+#         print(ExecuteOrder(**sell_order))
+#     elif quantityDifference < 0:
+#         best_ask = my_ceil((best_ask + 0.0004), 4)
+#         print(best_ask)
+#         buy_order_limit = orderType(abs(quantityDifference), best_ask)[1]
+#         print(ExecuteOrder(**buy_order_limit))
     
-    print("Order Complete. Balance now even.")
+#     print("Order Complete. Balance now even.")
 
 def CheckBalance():
     balance = float(GetBalance()[2].get("total", "<total not found>"))
@@ -108,7 +108,7 @@ def main():
     c = 0
     while (c != 2500):
         best_bid, best_ask = GetOrderBook("FBX-USDT")
-        inital_balance = CheckBalance()
+        # inital_balance = CheckBalance()
         
         # Decimal residue will occur if ceiling function not taken
         # No in-built numpy or math functions will let you specify decimal precision
@@ -130,7 +130,7 @@ def main():
         print(f"Bid: Amount@{quantity} Price@{value_in_range}")
         
         # Store balance after the trade
-        current_balance = CheckBalance()
+        # current_balance = CheckBalance()
         sell_response_id = sell_response.get("data", {}).get("id", {})
         buy_response_id = buy_response.get("data", {}).get("id", {})
 
@@ -146,8 +146,8 @@ def main():
         
         # Optimise using WebSockets
         # Check initial wallet balance is equal to current balance after execution.
-        if (inital_balance != current_balance):
-            MakeBalanceEven(best_bid, best_ask)
+        # if (inital_balance != current_balance):
+        #     MakeBalanceEven(best_bid, best_ask)
         c += 1
         main()
 
