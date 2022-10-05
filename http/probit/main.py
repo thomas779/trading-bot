@@ -149,7 +149,7 @@ def main():
         # if (inital_balance != current_balance):
         #     MakeBalanceEven(best_bid, best_ask)
         c += 1
-        main()
+        #main()
 
 if __name__ == '__main__':
     main()
