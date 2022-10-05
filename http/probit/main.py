@@ -77,7 +77,7 @@ def orderType(quantity=0, value_in_range=0, id=0):
     return sell_order, buy_order_limit, buy_order_market, cancel_order
 
 def MakeBalanceEven(best_bid, best_ask):
-    quantityDifference =  CheckBalance() - 10000
+    quantityDifference =  CheckBalance() - 3500
     quantityDifference = my_ceil(quantityDifference, 4)
     print(f"Balance Uneven. Submitting Order for {quantityDifference}...")
 
