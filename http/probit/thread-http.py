@@ -4,6 +4,7 @@ import time
 import threading
 import requests
 import json
+import random
 import concurrent.futures
 
 def FetchNewAccessToken():
@@ -16,9 +17,9 @@ def sell_order():
         "market_id": "FBX-USDT",
         "type": "limit",
         "side": "sell",
-        "quantity": "38",
+        "quantity": "200",
         "time_in_force": "gtc",
-        "limit_price": "0.0283"
+        "limit_price": "0.0280"
     }
     headers = {
         "accept": "application/json",
@@ -39,9 +40,9 @@ def buy_order():
         "market_id": "FBX-USDT",
         "type": "limit",
         "side": "buy",
-        "quantity": "38",
+        "quantity": "200",
         "time_in_force": "fok",
-        "limit_price": "0.0283"
+        "limit_price": "0.0280"
     }
     headers = {
         "accept": "application/json",
@@ -56,10 +57,9 @@ def buy_order():
     print(data)
 
 with concurrent.futures.ThreadPoolExecutor() as executor:
-    for _ in range(4):
+    for _ in range(2):
         executor.submit(sell_order)
         executor.submit(buy_order)
-    #executor.submit(time.sleep(9))
     
 
 # for _ in range(3):

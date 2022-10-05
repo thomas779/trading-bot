@@ -76,23 +76,23 @@ def orderType(quantity=0, value_in_range=0, id=0):
 
     return sell_order, buy_order_limit, buy_order_market, cancel_order
 
-# def MakeBalanceEven(best_bid, best_ask):
-#     quantityDifference =  CheckBalance() - 10000
-#     quantityDifference = my_ceil(quantityDifference, 4)
-#     print(f"Balance Uneven. Submitting Order for {quantityDifference}...")
+def MakeBalanceEven(best_bid, best_ask):
+    quantityDifference =  CheckBalance() - 10000
+    quantityDifference = my_ceil(quantityDifference, 4)
+    print(f"Balance Uneven. Submitting Order for {quantityDifference}...")
 
-#     if quantityDifference > 0:
-#         best_bid = my_ceil((best_bid - 0.0004), 4)
-#         print(best_bid)
-#         sell_order = orderType(quantityDifference, best_bid)[0]
-#         print(ExecuteOrder(**sell_order))
-#     elif quantityDifference < 0:
-#         best_ask = my_ceil((best_ask + 0.0004), 4)
-#         print(best_ask)
-#         buy_order_limit = orderType(abs(quantityDifference), best_ask)[1]
-#         print(ExecuteOrder(**buy_order_limit))
+    if quantityDifference > 0:
+        best_bid = my_ceil((best_bid - 0.0004), 4)
+        print(best_bid)
+        sell_order = orderType(quantityDifference, best_bid)[0]
+        print(ExecuteOrder(**sell_order))
+    elif quantityDifference < 0:
+        best_ask = my_ceil((best_ask + 0.0004), 4)
+        print(best_ask)
+        buy_order_limit = orderType(abs(quantityDifference), best_ask)[1]
+        print(ExecuteOrder(**buy_order_limit))
     
-#     print("Order Complete. Balance now even.")
+    print("Order Complete. Balance now even.")
 
 def CheckBalance():
     balance = float(GetBalance()[2].get("total", "<total not found>"))
@@ -119,7 +119,7 @@ def main():
         value_in_range = round(random.uniform(best_bid, best_ask),4)
 
         # Will fail if minimum value is below threshold needed to execute
-        quantity = round(random.uniform(20000, 40000),4)
+        quantity = round(random.uniform(200, 500),4)
         
         sell_order = orderType(quantity, value_in_range)[0]
         sell_response = ExecuteOrder(**sell_order)
@@ -142,17 +142,14 @@ def main():
 
         # Check if order was not filled correctly
         if "errorCode" in buy_response:
-            #print(quantity)
-            #print(buy_response)
             ErrorHandling(quantity)
-            # continue
         
         # Optimise using WebSockets
         # Check initial wallet balance is equal to current balance after execution.
-        # if (inital_balance != current_balance):
-        #     MakeBalanceEven(best_bid, best_ask)
-        # c += 1
-        # main()
+        if (inital_balance != current_balance):
+            MakeBalanceEven(best_bid, best_ask)
+        c += 1
+        main()
 
 if __name__ == '__main__':
     main()
